@@ -4,48 +4,58 @@ namespace WooProductField;
 
 defined( 'ABSPATH' ) || exit;
 
-class Product {
+class BaseProductFields {
 
-	/**
-	 * Define the core functionality of the plugin.
-	 *
-	 * @since 1.0.0
-	 */
+	protected $fields = [];
+
 	public function __construct() {
-
-		$this->hooks();
-
+        $this->fields = [
+			[
+				'id' => '_material',
+				'label' => __('Material', 'woo_product_field'),
+				'description' => __('Material', 'woo_product_field'),
+			],
+			[
+				'id' => '_n_of_teeth',
+				'label' => __('Hammaste arv', 'woo_product_field'),
+				'description' => __('Hammaste arv', 'woo_product_field'),
+			],
+			[
+				'id' => '_size',
+				'label' => __('Suurus', 'woo_product_field'),
+				'description' => __('Suurus', 'woo_product_field'),
+			],
+			[
+				'id' => '_color',
+				'label' => __('Värv', 'woo_product_field'),
+				'description' => __('Värv', 'woo_product_field'),
+			],
+			[
+				'id' => '_brand',
+				'label' => __('Bränd', 'woo_product_field'),
+				'description' => __('Bränd', 'woo_product_field'),
+			],
+        ];
 	}
+}
+class Product extends BaseProductFields {
+    public function __construct() {
+		parent::__construct();
+        $this->hooks();
+    }
 
-	/**
-	 * Register the hooks
-	 *
-	 * @since 1.0.0
-	 */
-	private function hooks() {
+    private function hooks() {
+        add_action('woocommerce_single_product_summary', array($this, 'add_stock_info'), 21);
+    }
 
-		add_action( 'woocommerce_single_product_summary', array( $this, 'add_stock_info' ), 21 );
+    public function add_stock_info() {
+        global $product;
 
-	}
-
-
-	/**
-	 * ADD stock information
-	 *
-	 * @since 1.0.0
-	 */
-	public function add_stock_info() {
-
-		global $product;
-
-		?>
-		<p><?php echo esc_html( $product->get_meta( '_new_stock_information' ) ); ?> </p>
-		<?php
-
-	}
-
-
-
-
-
+        foreach ($this->fields as $field) {
+            $field_value = $product->get_meta($field['id']);
+            if ($field_value) {
+                echo '<p>' . esc_html($field['label']) . ': ' . esc_html($field_value) . '</p>';
+            }
+        }
+    }
 }
